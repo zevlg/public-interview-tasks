@@ -44,8 +44,8 @@ main(int ac, char* av[static 1])
                 fatal("mmap()");
 
         uint8_t* spos;
-        while ((spos = memmem(data, data_sz, "\x00\x00\x00\x01", 4))) {
-                uint8_t nal_type = spos[4] & 0x3f;
+        while ((spos = memmem(data, data_sz, "\x00\x00\x01", 3))) {
+                uint8_t nal_type = spos[3] & 0x1f;
                 switch (nal_type) {
                 case 5:
                         printf("I");
@@ -57,7 +57,7 @@ main(int ac, char* av[static 1])
                         break;
                 }
 
-                data_sz -= (spos - data);
+                data_sz -= (spos + 4 - data);
                 data = spos + 4;
         }
         return 0;

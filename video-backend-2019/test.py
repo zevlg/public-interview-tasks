@@ -8,16 +8,21 @@ class AvcFramingTest(unittest.TestCase):
         def split_by_idr(framing):
             """Разбиваем раскадровку на гопы, генерируя число кадров в гопах."""
             gop_frames = 0
-            for s in framing:
+            first = True
+            for s in framing: # [1:] ?
                 if s == 'I':
-                    yield gop_frames
+                    if first:
+                        first = False
+                    else:
+                        yield gop_frames
                     gop_frames = 0
                 gop_frames += 1
+            yield gop_frames
 
         avcframes = subprocess.run(['./avcframes', 'bear.h264'], stdout=subprocess.PIPE)
 
         # Должно быть 3 гопа длинами 30, 30 и 22
-        gops = list(split_by_idr(avcframes.stdout))
+        gops = list(split_by_idr(avcframes.stdout.decode('utf-8')))
         self.assertEqual(len(gops), 3)
         self.assertEqual(gops[0], 30)
         self.assertEqual(gops[1], 30)
